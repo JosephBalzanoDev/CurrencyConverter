@@ -9,6 +9,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import it.josephbalzano.currencyconverter.network.Repos
 import it.josephbalzano.currencyconverter.network.model.CurrencyResponse
+import it.josephbalzano.currencyconverter.swap
 import it.josephbalzano.currencyconverter.view.model.CurrencyCode
 import it.josephbalzano.currencyconverter.view.model.CurrencyItem
 import java.util.concurrent.TimeUnit
@@ -19,11 +20,11 @@ import java.util.concurrent.TimeUnit
 class MainActivityViewModel : ViewModel() {
     private val TAG = "MainActivityViewModel"
 
-    private var livedata = MutableLiveData<List<CurrencyItem>>()
-    private var selectedCurrency = CurrencyCode.EUR
+    var livedata = MutableLiveData<MutableList<CurrencyItem>>()
+    var selectedCurrency = CurrencyItem(CurrencyCode.EUR, 1.0)
 
     @SuppressLint("CheckResult")
-    fun fetchData(): MutableLiveData<List<CurrencyItem>> {
+    fun fetchData(): MutableLiveData<MutableList<CurrencyItem>> {
         Observable.interval(1, TimeUnit.SECONDS)
             .flatMapSingle { updateValues() }
             .flatMapSingle { mappingData(it) }
@@ -36,22 +37,31 @@ class MainActivityViewModel : ViewModel() {
     /**
      * Prepare list of items to map it with values
      */
-    private fun prepareLiveData(): List<CurrencyItem> =
-        CurrencyCode.values().map { CurrencyItem(false, it, 0.0) }
+    private fun prepareLiveData(): MutableList<CurrencyItem> =
+        CurrencyCode.values()
+            .map {
+                if (it == selectedCurrency.currencyCode) selectedCurrency
+                else CurrencyItem(it, 0.0)
+            }
+            .toMutableList()
 
     /**
      * Map response retrieved response with list of items
      */
-    private fun mappingData(response: CurrencyResponse): Single<List<CurrencyItem>> =
-        Single.just(
-            livedata.value ?: prepareLiveData()
-                .map {
-                    val field =
-                        CurrencyResponse.Rates::class.java.getDeclaredField(it.currencyCode.code)
-                    field.isAccessible = true
-                    it.value = field.get(response.rates) as Double
-                    it
-                })
+    private fun mappingData(response: CurrencyResponse): Single<MutableList<CurrencyItem>> {
+        var list = livedata.value ?: prepareLiveData()
+        list = list.map {
+            if (it.currencyCode != selectedCurrency.currencyCode) {
+                val field =
+                    CurrencyResponse.Rates::class.java.getDeclaredField(it.currencyCode.code)
+                field.isAccessible = true
+                it.value = (field.get(response.rates) as Double) * selectedCurrency.value
+                it
+            } else it
+        }.toMutableList()
+        return Single.just(list)
+    }
+
 
     /**
      * Call API to update value
@@ -59,5 +69,15 @@ class MainActivityViewModel : ViewModel() {
     private fun updateValues() =
         Repos.instance
             .currencyApi!!
-            .latest(selectedCurrency.code)
+            .latest(selectedCurrency.currencyCode.code)
+
+    fun selectItem(item: CurrencyItem, indexOf: Int) {
+        item.value = 1.0
+        selectedCurrency = item
+        livedata.value!!.swap(indexOf)
+    }
+
+    fun changeCurrentValue(value: Double) {
+        selectedCurrency.value = value
+    }
 }

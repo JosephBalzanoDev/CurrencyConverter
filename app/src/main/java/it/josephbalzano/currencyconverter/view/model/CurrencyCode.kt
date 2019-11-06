@@ -1,5 +1,7 @@
 package it.josephbalzano.currencyconverter.view.model
 
+import it.josephbalzano.currencyconverter.R
+
 /**
  * Created by Joseph Balzano 05/11/2019
  */
@@ -9,7 +11,8 @@ enum class CurrencyCode(
     val description: String
 ) {
     // TODO
-    AUD("AUD", 0, "Australian Dollar"),
+    EUR("EUR", 0, ""),
+    AUD("AUD", R.drawable.ic_test_image, "Australian Dollar"),
     BGN("BGN", 0, "Bulgarian Lev"),
     BRL("BRL", 0, "Brazilian Real"),
     CAD("CAD", 0, "Canadian Dollar"),
@@ -17,7 +20,6 @@ enum class CurrencyCode(
     CNY("CNY", 0, ""),
     CZK("CZK", 0, ""),
     DKK("DKK", 0, ""),
-    EUR("EUR", 0, ""),
     GBP("GBP", 0, ""),
     HKD("HKD", 0, ""),
     HRK("HRK", 0, ""),
