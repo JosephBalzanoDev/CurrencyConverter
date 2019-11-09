@@ -1,6 +1,7 @@
 package it.josephbalzano.currencyconverter.view
 
 import android.os.Bundle
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -17,10 +18,6 @@ import kotlinx.android.synthetic.main.activity_main.*
  * Created by Joseph Balzano 05/11/2019
  */
 class MainActivity : AppCompatActivity(), CurrencyAdapter.ViewHolderListener {
-    override fun onValueChanged(value: Double) {
-        viewModel.changeCurrentValue(value)
-    }
-
     private var isSelected: Boolean = false
     private lateinit var viewModel: MainActivityViewModel
 
@@ -28,6 +25,9 @@ class MainActivity : AppCompatActivity(), CurrencyAdapter.ViewHolderListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+
         setContentView(R.layout.activity_main)
 
         viewModel = ViewModelProviders.of(this).get(MainActivityViewModel::class.java)
@@ -36,25 +36,30 @@ class MainActivity : AppCompatActivity(), CurrencyAdapter.ViewHolderListener {
         initObserver()
     }
 
-    private fun initObserver() {
-        viewModel.fetchData().observe(this, Observer {
-            if (!currencyList.isAnimating && !isSelected)
-                adapter.updateItems(it)
-        })
-    }
-
     private fun initView() {
         currencyList.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         currencyList.adapter = adapter
+    }
+
+    private fun initObserver() {
+        viewModel.fetchData().observe(this, Observer {
+            if (!currencyList.isAnimating && !isSelected) adapter.updateItems(it)
+        })
     }
 
     override fun onItemClick(item: CurrencyItem, indexOf: Int) {
         if (item.currencyCode == viewModel.selectedCurrency.currencyCode) return
 
         isSelected = true
+
         viewModel.selectItem(item, indexOf)
         adapter.swipeToUp(indexOf)
         currencyList.scrollToPosition(0)
+
         isSelected = false
+    }
+
+    override fun onValueChanged(value: Double) {
+        viewModel.changeCurrentValue(value)
     }
 }

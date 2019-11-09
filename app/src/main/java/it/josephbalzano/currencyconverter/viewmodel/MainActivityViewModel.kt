@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit
  * Created by Joseph Balzano 05/11/2019
  */
 class MainActivityViewModel : ViewModel() {
-    private val TAG = "MainActivityViewModel"
-
     var livedata = MutableLiveData<MutableList<CurrencyItem>>()
     var selectedCurrency = CurrencyItem(CurrencyCode.EUR, 1.0)
 
@@ -50,6 +48,7 @@ class MainActivityViewModel : ViewModel() {
      */
     private fun mappingData(response: CurrencyResponse): Single<MutableList<CurrencyItem>> {
         var list = livedata.value ?: prepareLiveData()
+
         list = list.map {
             if (it.currencyCode != selectedCurrency.currencyCode) {
                 val field =
@@ -59,6 +58,7 @@ class MainActivityViewModel : ViewModel() {
                 it
             } else it
         }.toMutableList()
+
         return Single.just(list)
     }
 
@@ -67,12 +67,10 @@ class MainActivityViewModel : ViewModel() {
      * Call API to update value
      */
     private fun updateValues() =
-        Repos.instance
-            .currencyApi!!
+        Repos.instance.currencyApi!!
             .latest(selectedCurrency.currencyCode.code)
 
     fun selectItem(item: CurrencyItem, indexOf: Int) {
-        item.value = 1.0
         selectedCurrency = item
         livedata.value!!.swap(indexOf)
     }
