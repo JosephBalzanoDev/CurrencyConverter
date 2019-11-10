@@ -5,6 +5,9 @@ import androidx.annotation.Nullable
 import androidx.recyclerview.widget.DiffUtil
 import it.josephbalzano.currencyconverter.view.model.CurrencyItem
 
+/**
+ * Created by Joseph Balzano 08/11/2019
+ */
 class DiffCurrencyUtils(
     private val newItems: List<CurrencyItem>,
     private val oldItems: List<CurrencyItem>

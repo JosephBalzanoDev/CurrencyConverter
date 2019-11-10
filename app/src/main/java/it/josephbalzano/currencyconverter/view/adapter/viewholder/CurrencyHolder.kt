@@ -9,6 +9,9 @@ import it.josephbalzano.currencyconverter.view.model.CurrencyItem
 import kotlinx.android.synthetic.main.currency_item.view.*
 import java.text.NumberFormat
 
+/**
+ * Created by Joseph Balzano 09/11/2019
+ */
 class CurrencyHolder(
     view: View, listener: CurrencyAdapter.ViewHolderListener, items: MutableList<CurrencyItem>
 ) : RecyclerView.ViewHolder(view) {
@@ -54,7 +57,7 @@ class CurrencyHolder(
         itemView.code.text = item.currencyCode.code
         itemView.descr.text = item.currencyCode.description
         itemView.value.setText(String.format("%.2f", item.value))
-        itemView.currency.setText(item.currencyCode.symbol)
+//        itemView.currency.setText(item.currencyCode.symbol)
     }
 
     fun bind(value: Double) {

@@ -9,7 +9,9 @@ import it.josephbalzano.currencyconverter.swap
 import it.josephbalzano.currencyconverter.view.adapter.viewholder.CurrencyHolder
 import it.josephbalzano.currencyconverter.view.model.CurrencyItem
 
-
+/**
+ * Created by Joseph Balzano 06/11/2019
+ */
 class CurrencyAdapter(private val listener: ViewHolderListener) :
     RecyclerView.Adapter<CurrencyHolder>() {
     private var items = mutableListOf<CurrencyItem>()
