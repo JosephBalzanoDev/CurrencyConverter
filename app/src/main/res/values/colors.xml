@@ -3,4 +3,6 @@
     <color name="colorPrimary">#EEE</color>
     <color name="colorPrimaryDark">#CCC</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="ic_launcher_background">#FFB500</color>
 </resources>

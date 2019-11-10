@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import it.josephbalzano.currencyconverter.R
 import it.josephbalzano.currencyconverter.view.adapter.CurrencyAdapter
 import it.josephbalzano.currencyconverter.view.model.CurrencyItem
@@ -51,7 +52,13 @@ class MainActivity : AppCompatActivity(), CurrencyAdapter.ViewHolderListener {
         viewModel.getItemsLiveData().removeObservers(this)
 
         viewModel.getItemsLiveData().observe(this, Observer {
-            if (!currencyList.isAnimating && !isManagingSelection) adapter.updateItems(it)
+            if (it == null)
+                Snackbar.make(
+                    mainView,
+                    "No connection...",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            else if (!currencyList.isAnimating && !isManagingSelection) adapter.updateItems(it)
         })
     }
 

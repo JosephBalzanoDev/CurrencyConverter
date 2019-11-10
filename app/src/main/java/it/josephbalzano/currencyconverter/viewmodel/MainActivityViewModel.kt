@@ -41,7 +41,7 @@ class MainActivityViewModel : ViewModel() {
             .flatMapSingle { mappingData(it) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { value -> items.postValue(value) }
+            .subscribe({ value -> items.postValue(value) }, { items.postValue(null) })
     }
 
     /**
@@ -122,5 +122,9 @@ class MainActivityViewModel : ViewModel() {
     private fun updateValues() =
         Repos.instance.currencyApi!!
             .latest(selectedItem.currencyCode.code)
+            .onErrorReturn {
+                if (cachedResponse != null) cachedResponse
+                else null
+            }
             .flatMap { cacheResponse(it) }
 }
