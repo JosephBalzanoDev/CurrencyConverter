@@ -18,18 +18,72 @@ import java.util.concurrent.TimeUnit
  * Created by Joseph Balzano 05/11/2019
  */
 class MainActivityViewModel : ViewModel() {
-    var livedata = MutableLiveData<MutableList<CurrencyItem>>()
-    var selectedCurrency = CurrencyItem(CurrencyCode.EUR, 1.0)
+    var selectedItem = CurrencyItem(CurrencyCode.EUR, 1.0)
+        set(value) {
+            // This check is used to start update of UI with old response data
+            if (field.value != value.value && field.currencyCode == value.currencyCode)
+                newValue()
 
+            field = value
+        }
+
+    private var cachedResponse: CurrencyResponse? = null
+    private var items = MutableLiveData<MutableList<CurrencyItem>>()
+
+    /**
+     * Start receiving data from API services every second, cache response,
+     * map it and the fire it to LiveData
+     */
     @SuppressLint("CheckResult")
-    fun fetchData(): MutableLiveData<MutableList<CurrencyItem>> {
+    fun fetchData() {
         Observable.interval(1, TimeUnit.SECONDS)
             .flatMapSingle { updateValues() }
             .flatMapSingle { mappingData(it) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { value -> livedata.postValue(value) }
-        return livedata
+            .subscribe { value -> items.postValue(value) }
+    }
+
+    /**
+     * Getter of items
+     */
+    fun getItemsLiveData(): MutableLiveData<MutableList<CurrencyItem>> = items
+
+    /**
+     * Handle the correct selection of item from list
+     * First of all we set new selection then swap items list
+     */
+    fun selectItem(item: CurrencyItem, indexOf: Int) {
+        selectedItem = item
+        items.value!!.swap(indexOf)
+    }
+
+    /**
+     * Handle change of current value for selected currency
+     */
+    fun changeCurrentValue(value: Double) {
+        selectedItem.value = value
+    }
+
+    /**
+     * Handle changing of value, so we pick last response and re-map all response values with
+     * user value of selected currency
+     */
+    @SuppressLint("CheckResult")
+    private fun newValue() {
+        if (cachedResponse == null) return
+
+        mappingData(cachedResponse!!)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { value -> items.postValue(value) }
+    }
+
+    /**
+     * Save last response from services
+     */
+    private fun cacheResponse(it: CurrencyResponse): Single<CurrencyResponse> {
+        cachedResponse = it
+        return Single.just(it)
     }
 
     /**
@@ -38,7 +92,7 @@ class MainActivityViewModel : ViewModel() {
     private fun prepareLiveData(): MutableList<CurrencyItem> =
         CurrencyCode.values()
             .map {
-                if (it == selectedCurrency.currencyCode) selectedCurrency
+                if (it == selectedItem.currencyCode) selectedItem
                 else CurrencyItem(it, 0.0)
             }
             .toMutableList()
@@ -47,14 +101,14 @@ class MainActivityViewModel : ViewModel() {
      * Map response retrieved response with list of items
      */
     private fun mappingData(response: CurrencyResponse): Single<MutableList<CurrencyItem>> {
-        var list = livedata.value ?: prepareLiveData()
+        var list = items.value ?: prepareLiveData()
 
         list = list.map {
-            if (it.currencyCode != selectedCurrency.currencyCode) {
+            if (it.currencyCode != selectedItem.currencyCode) {
                 val field =
                     CurrencyResponse.Rates::class.java.getDeclaredField(it.currencyCode.code)
                 field.isAccessible = true
-                it.value = (field.get(response.rates) as Double) * selectedCurrency.value
+                it.value = (field.get(response.rates) as Double) * selectedItem.value
                 it
             } else it
         }.toMutableList()
@@ -62,20 +116,11 @@ class MainActivityViewModel : ViewModel() {
         return Single.just(list)
     }
 
-
     /**
      * Call API to update value
      */
     private fun updateValues() =
         Repos.instance.currencyApi!!
-            .latest(selectedCurrency.currencyCode.code)
-
-    fun selectItem(item: CurrencyItem, indexOf: Int) {
-        selectedCurrency = item
-        livedata.value!!.swap(indexOf)
-    }
-
-    fun changeCurrentValue(value: Double) {
-        selectedCurrency.value = value
-    }
+            .latest(selectedItem.currencyCode.code)
+            .flatMap { cacheResponse(it) }
 }

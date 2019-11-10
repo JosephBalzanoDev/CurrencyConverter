@@ -50,6 +50,9 @@ class CurrencyHolder(
         })
     }
 
+    /**
+     * Bind method with change all model holder
+     */
     fun bind(item: CurrencyItem) {
         this.model = item
 
@@ -57,9 +60,11 @@ class CurrencyHolder(
         itemView.code.text = item.currencyCode.code
         itemView.descr.text = item.currencyCode.description
         itemView.value.setText(String.format("%.2f", item.value))
-//        itemView.currency.setText(item.currencyCode.symbol)
     }
 
+    /**
+     * Bind method with change only value
+     */
     fun bind(value: Double) {
         model.value = value
 

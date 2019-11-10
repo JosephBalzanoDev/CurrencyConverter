@@ -48,21 +48,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:inputType="numberDecimal"
+        android:digits="0123456789,"
+        android:inputType="number"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="0.2342" />
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/currency"-->
-    <!--        android:layout_width="24dp"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginEnd="16dp"-->
-    <!--        android:gravity="center_vertical"-->
-    <!--        android:textSize="16sp"-->
-    <!--        app:layout_constraintBottom_toBottomOf="@id/value"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="@id/value"-->
-    <!--        tools:text="€" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

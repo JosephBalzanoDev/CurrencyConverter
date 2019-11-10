@@ -38,6 +38,10 @@ class CurrencyAdapter(private val listener: ViewHolderListener) :
 
     override fun getItemCount(): Int = items.size
 
+    /**
+     * Update all items into list
+     * We calculate the diff from old list to the new one
+     */
     fun updateItems(elements: List<CurrencyItem>) {
         val diffCallback = DiffCurrencyUtils(elements, items)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
@@ -47,6 +51,9 @@ class CurrencyAdapter(private val listener: ViewHolderListener) :
         items.addAll(elements)
     }
 
+    /**
+     * Swipe an element to position 0
+     */
     fun swipeToUp(itemIndex: Int) {
         items.swap(itemIndex)
         notifyItemMoved(itemIndex, 0)
